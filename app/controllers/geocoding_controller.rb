@@ -17,12 +17,22 @@ class GeocodingController < ApplicationController
     #   characters removed, is in the variable @street_address_without_spaces.
     # ==========================================================================
 
+    if @street_address == ""
+          latitude = 'N/A'
+          longitude = 'N/A'
+        else
+          url_break='http://maps.googleapis.com/maps/api/geocode/json?address='
+          url = url_break + @street_address_without_spaces
 
+          parsed_data = JSON.parse(open(url).read)
 
-    @latitude = "Replace this string with your answer."
+          latitude = parsed_data['results'][0]["geometry"]["location"]["lat"]
+          longitude = parsed_data["results"][0]["geometry"]["location"]["lng"]
 
-    @longitude = "Replace this string with your answer."
+          @latitude = latitude
+          @longitude = longitude
+        end
 
-    render("geocoding/street_to_coords.html.erb")
-  end
-end
+        render("geocoding/street_to_coords.html.erb")
+      end
+    end

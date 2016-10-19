@@ -18,17 +18,41 @@ class MeteorologistController < ApplicationController
     # ==========================================================================
 
 
+    if @street_address == ""
 
-    @current_temperature = "Replace this string with your answer."
+        @current_temperature = 'N/A'
+        @current_summary = 'N/A'
+        @summary_of_next_sixty_minutes = 'N/A'
+        @summary_of_next_several_hours = 'N/A'
+        @summary_of_next_several_days = 'N/A'
 
-    @current_summary = "Replace this string with your answer."
+      else
 
-    @summary_of_next_sixty_minutes = "Replace this string with your answer."
+        map_break='http://maps.googleapis.com/maps/api/geocode/json?address='
+        map = map_break + @street_address_without_spaces
 
-    @summary_of_next_several_hours = "Replace this string with your answer."
+        parsed_data = JSON.parse(open(map).read)
 
-    @summary_of_next_several_days = "Replace this string with your answer."
+        latitude = parsed_data['results'][0]["geometry"]["location"]["lat"].to_s
+        longitude = parsed_data["results"][0]["geometry"]["location"]["lng"].to_s
 
-    render("meteorologist/street_to_weather.html.erb")
+
+        coord_break = 'https://api.darksky.net/forecast/b3d079e8705d08518029b0fa1afe8e24/'
+        coord = coord_break + latitude + ',' + longitude
+
+        parsed_data = JSON.parse(open(coord).read)
+
+        @current_temperature = parsed_data["currently"]["temperature"]
+
+        @current_summary = parsed_data["currently"]["summary"]
+
+        @summary_of_next_sixty_minutes = parsed_data["minutely"]["summary"]
+
+        @summary_of_next_several_hours = parsed_data["hourly"]["summary"]
+
+        @summary_of_next_several_days = parsed_data["daily"]["summary"]
   end
-end
+
+      render("meteorologist/street_to_weather.html.erb")
+    end
+  end
